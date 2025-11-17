@@ -1,1 +1,13 @@
-.idea
+.idea/
+target/
+build/
+*.log
+logs/
+
+*.class
+*.jar
+*.war
+*.nar
+*.zip
+*.tar
+*.gz
