@@ -38,14 +38,102 @@
 
 ---
 
-## 🧩 설계 구조
+## 🧩 카드게임 흐름
 ```mermaid
-Card (interface) → AbstractCard → PlayingCard
-Deck (interface) → AbstractDeck → StandardDeck
-Player (interface) → BasicPlayer
-Dealer (interface) → DealerImpl
-Evaluator (interface) → PokerHandEvaluator
-Game (interface) → AbstractGame → PokerGame
+ sequenceDiagram
+      participant Main
+      participant PokerGame
+      participant AbstractGame
+      participant Dealer
+      participant Deck
+      participant Card
+      participant Player
+      participant HandEvaluator
+
+      Main->>+Deck: new StandardDeck()
+      Deck->>Deck: initialize()
+      loop 52 cards (4 suits × 13 ranks)
+          Deck->>+Card: new PlayingCard(suit, rank)
+          Card-->>-Deck: card
+          Deck->>Deck: cards.add(card)
+      end
+      Deck-->>-Main: deck
+
+      Main->>+Player: new BasicPlayer(nickname) × 4
+      Player-->>-Main: players (list)
+
+      Main->>+HandEvaluator: new PokerHandEvaluator()
+      HandEvaluator-->>-Main: evaluator
+
+      Main->>+Dealer: new DealerImpl(evaluator)
+      Dealer-->>-Main: dealer
+
+      Main->>+PokerGame: new PokerGame(dealer, deck, players)
+      PokerGame-->>-Main: game
+
+      Main->>+PokerGame: start()
+      PokerGame->>+AbstractGame: start()
+      AbstractGame-->>-PokerGame: "게임 시작! 덱이 섞였습니다."
+
+      loop 100 rounds
+          PokerGame->>+Deck: reset()
+          Deck->>Deck: cards.clear()
+          Deck->>Deck: initialize()
+          loop 52 cards
+              Deck->>+Card: new PlayingCard(suit, rank)
+              Card-->>-Deck: card
+              Deck->>Deck: cards.add(card)
+          end
+          Deck->>Deck: shuffle()
+          Deck-->>-PokerGame: 덱 초기화 완료
+
+          PokerGame->>+Dealer: dealCards(players, deck)
+          loop 5 times
+              loop each player (4명)
+                  Dealer->>+Deck: draw()
+                  Deck->>Deck: cards.remove(0)
+                  Deck-->>-Dealer: card
+                  Dealer->>+Player: receiveCard(card)
+                  Player->>Player: hand.add(card)
+                  Player-->>-Dealer: 카드 수령 완료
+              end
+          end
+          Dealer-->>-PokerGame: 카드 분배 완료
+
+          PokerGame->>+Dealer: getWinner(players)
+          loop each player
+              Dealer->>+Player: getHand()
+              Player-->>-Dealer: List<Card> hand
+              Dealer->>+HandEvaluator: evaluate(hand)
+              HandEvaluator->>HandEvaluator: 손패 평가 (족보 계산)
+              HandEvaluator-->>-Dealer: score
+          end
+          Dealer->>Dealer: 최고 점수 플레이어 선정
+          Dealer-->>-PokerGame: winner
+
+          alt winner exists
+              PokerGame->>+Player: addWin()
+              Player-->>-PokerGame: 승리 카운트 증가
+              PokerGame->>+Player: addMoney(100)
+              Player-->>-PokerGame: 금액 증가
+              loop losers
+                  PokerGame->>+Player: addLose()
+                  Player-->>-PokerGame: 패배 카운트 증가
+              end
+          end
+
+          loop each player
+              PokerGame->>+Player: clearHand()
+              Player->>Player: hand.clear()
+              Player-->>-PokerGame: 손패 초기화 완료
+          end
+      end
+
+      PokerGame->>PokerGame: 최종 결과 정렬 및 출력
+
+      PokerGame->>+AbstractGame: end()
+      AbstractGame-->>-PokerGame: "게임 종료!"
+      PokerGame-->>-Main: 게임 완료
 ```
 
 ---
