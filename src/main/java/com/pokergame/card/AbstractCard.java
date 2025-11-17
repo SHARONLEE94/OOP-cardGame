@@ -1,6 +1,6 @@
 package com.pokergame.card;
 
-public class AbstractCard implements Card{
+public abstract class AbstractCard implements Card{
     protected String suit;
     protected String rank;
 
