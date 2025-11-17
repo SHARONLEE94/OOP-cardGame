@@ -5,7 +5,6 @@ import com.pokergame.evaluator.HandEvaluator;
 import com.pokergame.player.Player;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 

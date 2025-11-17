@@ -19,7 +19,7 @@ public abstract class AbstractGame implements Game{
 
     @Override
     public void start() {
-        System.out.println("게임 시작! 덱이 섞였습니다.");
+        System.out.println("게임 시작!");
     }
 
     @Override
